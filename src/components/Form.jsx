@@ -1,40 +1,49 @@
 import { useEffect, useState } from "react";
 import AlertError from "./AlertError";
-const Form = () => {
 
-  const Form = ({tareas, settareas, tarea, setTArea}) =>{
-
-  } 
-  const [titulo, setTitulo] = useState('');
-  const [fecha, setFeha] = useState('');
-  const [descripcion, setDescripcion] = useState('');
+  const Form = ({ tareas, setTareas, tarea, setTarea }) => {
+  const [titulo, setTitulo] = useState("");
+  const [fecha, setFeha] = useState("");
+  const [descripcion, setDescripcion] = useState("");
   const [error, setError] = useState(false);
 
-  useEffect(() =>{
-    if(Object.keys(tarea).length > 0){
+  useEffect(() => {
+    if (Object.keys(tarea).length > 0) {
       setTitulo(tarea.titulo);
       setFeha(tarea.feha);
       setDescripcion(tarea.descripcion);
     }
   }, [tarea]);
 
+  const generarId = () => {
+    const id = Math.floor(Math.random() * 1000);
+    return id
+  }
+
   const handleSubmit = (e) => {
     e.preventDefault();
     //validación del formulario
-    if([titulo, fecha, descripcion].includes("")){
+    if([titulo, fecha, descripcion].includes("")) {
       setError(true);
       return;
     }
     setError(false);
-    const objetoTareas = {
-      titulo,
-      fecha,
-      descripcion
+    const objetoTareas = { titulo, fecha, descripcion }
+    if(tarea.id){
+        //Editando la tarea
+        objetoTareas.id = tarea.id;
+        const tareasActualizadas = tareas.map((tareaState) =>
+        tareaState.id === tarea.id ? objetoTareas : tareaState
+        );
+
+        setTareas(tareasActualizadas)
+        setTarea({});
+    }else {
+      //Nueva tarea
+      objetoTareas.id = generarId();
+      setTareas([...tareas, objetoTareas]);
     }
-    //if(tarea.id){
 
-
-    //}
   };
 
   return (
@@ -43,13 +52,15 @@ const Form = () => {
         Creación de Tareas
       </h2>
 
-      <form onSubmit={handleSubmit} className="bg-white shadow-md rounded-lg py-10 px-5 mb-10">
-
-      {error && (
-        <AlertError>
-          <p>Todos los campos son obligatorios</p>
-        </AlertError>
-      )}
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white shadow-md rounded-lg py-10 px-5 mb-10"
+      >
+        {error && (
+          <AlertError>
+            <p>Todos los campos son obligatorios</p>
+          </AlertError>
+        )}
 
         <div className="mb-5">
           <label
@@ -98,20 +109,22 @@ const Form = () => {
             onChange={(e) => setDescripcion(e.target.value)}
           />
         </div>
-
-        <input
-          type="submit"
-          className="bg-blue-600 w-full p-3 text-white uppercase font-bold rounded-md hover:bg-blue-700 transition-colors cursor-pointer mb-4"
-          value="Crear Tarea"
-        />
-        <input
-          type="submit"
-          className="bg-purple-600 w-full p-3 text-white uppercase font-bold rounded-md hover:bg-purple-700 transition-colors cursor-pointer"
-          value="Actualizar Tarea"
-        />
+        {!tarea.id ? (
+          <input
+            type="submit"
+            className="bg-blue-600 w-full p-3 text-white uppercase font-bold rounded-md hover:bg-blue-700 transition-colors cursor-pointer mb-4"
+            value="Crear Tarea"
+          />
+        ) : (
+          <input
+            type="submit"
+            className="bg-purple-600 w-full p-3 text-white uppercase font-bold rounded-md hover:bg-purple-700 transition-colors cursor-pointer"
+            value="Actualizar Tarea"
+          />
+        )}
       </form>
     </div>
   );
-};
+  };
 
 export default Form;
